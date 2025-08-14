@@ -7,19 +7,19 @@ env:
   - CGO_ENABLED=1
   - BUILD_TAGS=netgo,muslc
 
-before:
-  hooks:
-    - go mod tidy
+# before:
+#   hooks:
+#     - go mod tidy
 
 builds:
   - id: "gurud"
     main: ./cmd/gurud
     binary: gurud
     goos:
-      - darwin
+      - linux
     goarch:
-      - arm64
-    # Focus on current platform for testing
+      - amd64
+    # Focus on Linux AMD64 for GitHub Actions
     env:
       - CGO_ENABLED=1
     flags:
