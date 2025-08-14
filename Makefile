@@ -253,7 +253,7 @@ proto-check-breaking:
 ###############################################################################
 
 PACKAGE_NAME:=github.com/GPTx-global/guru-v2
-GOLANG_CROSS_VERSION  = v1.22
+GOLANG_CROSS_VERSION  = v1.23
 GOPATH ?= '$(HOME)/go'
 release-dry-run:
 	docker run \

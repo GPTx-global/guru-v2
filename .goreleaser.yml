@@ -1,0 +1,90 @@
+# GoReleaser v2 configuration for GitHub Actions
+version: 2
+
+project_name: guru-v2
+
+env:
+  - CGO_ENABLED=1
+  - BUILD_TAGS=netgo,muslc
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: "gurud"
+    main: ./cmd/gurud
+    binary: gurud
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    # Focus on current platform for testing
+    env:
+      - CGO_ENABLED=1
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/cosmos/cosmos-sdk/version.Name=gurud
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=gurud
+      - -X github.com/cosmos/cosmos-sdk/version.Version={{.Version}}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{.Commit}}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{.Env.BUILD_TAGS}}
+
+archives:
+  - id: default
+    name_template: >-
+      {{- .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end -}}
+    files:
+      - LICENSE*
+      - README*
+      - CHANGELOG*
+    wrap_in_directory: true
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+      - go mod tidy
+
+release:
+  github:
+    owner: GPTx-global
+    name: guru-v2
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}}-v{{.Version}}"
+  header: |
+    ## Guru v{{.Version}}
+    
+    Welcome to this new release!
+  footer: |
+    ## Docker Images
+    
+    Docker images are available at:
+    - `ghcr.io/gptx-global/guru-v2:{{.Version}}`
+    - `ghcr.io/gptx-global/guru-v2:latest`
+
+# Disable Docker builds for now as they require additional setup
+dockers:
+  - skip_push: true
